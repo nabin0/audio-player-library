@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorDefault">#d8d8d8</color>
+    <color name="white_color">#ffffff</color>
+    <color name="red_color">#ff0000</color>
+    <color name="black_color">#000000</color>
+    <color name="transparentColor">#00000000</color>
+
+    <color name="controlsBackground">#FA2D2E30</color>
+    <color name="colorText">#99FFFFFF</color>
+    <color name="colorOptionBackground">#FFFFFF</color>
+    <color name="colorTransparent">#00FFFFFF</color>
+    <color name="colorSeekTransparent">#12FAF7F7</color>
+    <color name="colorSource">#99ED7E18</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="sheetBackground">#80000000</color>
+    <color name="colorBlack">#000000</color>
+    <color name="live_red">#FF3144</color>
+    <color name="btn_red">#d20820</color>
+    <color name="colorNavBarText">#8C8C8C</color>
+</resources>
