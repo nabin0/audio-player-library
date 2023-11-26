@@ -1,4 +1,4 @@
-package com.vl.vlplayer.demo.audioplayer
+package com.example.audioplayerlibaray.audioplayer
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,8 +10,7 @@ import android.widget.ListView
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import com.example.audioplayerlibaray.R
-import com.example.audioplayerlibaray.audioplayer.PlayerDetailFragment
-import com.nabin0.audioplayer.view.AudioMiniPlayer
+import com.github.nabin0.audioplayer.view.AudioMiniPlayer
 
 class AudioListFragment : Fragment() {
     private lateinit var listView: ListView
@@ -68,10 +67,10 @@ class AudioListFragment : Fragment() {
                 id: Long,
             ) {
                 val layoutId: Int = when (position) {
-                    0 -> com.nabin0.audio_player.R.layout.audio_mini_player_layout// This is default layout no need to apply manually
+                    0 -> com.github.nabin0.audioplayer.R.layout.audio_mini_player_layout// This is default layout no need to apply manually
                     1 -> R.layout.audio_mini_player_sample_layout_1
                     2 -> R.layout.audio_mini_player_sample_layout_2
-                    else -> com.nabin0.audio_player.R.layout.audio_mini_player_layout
+                    else -> com.github.nabin0.audioplayer.R.layout.audio_mini_player_layout
                 }
                 audioMiniPlayer.setCustomLayout(layoutId)
             }

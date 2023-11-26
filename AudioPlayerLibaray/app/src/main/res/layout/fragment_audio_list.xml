@@ -23,7 +23,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/customLayoutsSpinner" />
 
-    <com.nabin0.audioplayer.view.AudioMiniPlayer
+    <com.github.nabin0.audioplayer.view.AudioMiniPlayer
         android:id="@+id/audioMiniPlayer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

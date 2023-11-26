@@ -1,16 +1,11 @@
-package com.vl.vlplayer.demo.audioplayer.ui.theme
+package com.example.audioplayerlibaray.audioplayer.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import com.example.audioplayerlibaray.audioplayer.ui.theme.Purple40
+import com.example.audioplayerlibaray.audioplayer.ui.theme.Purple80
+import com.example.audioplayerlibaray.audioplayer.ui.theme.PurpleGrey40
+import com.example.audioplayerlibaray.audioplayer.ui.theme.PurpleGrey80
 
 private val DarkColorScheme = darkColors(
     primary = Purple80,

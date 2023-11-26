@@ -11,8 +11,6 @@ import android.widget.FrameLayout
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import com.example.audioplayerlibaray.R
-import com.nabin0.audioplayer.view.AudioPlayer
-import com.vl.vlplayer.demo.audioplayer.Utils
 
 /**
  * A simple [Fragment] subclass.
@@ -21,7 +19,7 @@ import com.vl.vlplayer.demo.audioplayer.Utils
  */
 class PlayerDetailFragment : Fragment() {
     private var selectedIndex: Int = 0
-    var audioPlayer: AudioPlayer? = null
+    var audioPlayer: com.github.nabin0.audioplayer.view.AudioPlayer? = null
     lateinit var containerAudioView: FrameLayout
     private var spinner: Spinner? = null
     private val customLayoutSampleList =
@@ -85,11 +83,11 @@ class PlayerDetailFragment : Fragment() {
             ) {
                 Log.d("TAG", "onItemSelected: $position")
                 val layoutId: Int = when (position) {
-                    0 -> com.nabin0.audio_player.R.layout.audio_player_control // This is default layout no need to apply manually
+                    0 -> com.github.nabin0.audioplayer.R.layout.audio_player_control // This is default layout no need to apply manually
                     1 -> R.layout.audio_player_sample_layout_1
                     2 -> R.layout.audio_player_sample_layout_2
                     3 -> R.layout.audio_player_sample_layout_3
-                    else -> com.nabin0.audio_player.R.layout.audio_player_control
+                    else -> com.github.nabin0.audioplayer.R.layout.audio_player_control
                 }
                 audioPlayer?.setCustomLayout(layoutId)
             }

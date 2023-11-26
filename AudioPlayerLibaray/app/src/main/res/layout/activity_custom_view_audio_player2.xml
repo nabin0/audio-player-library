@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".audioplayer.CustomViewAudioPlayer2">
 
-    <com.vl.viewlift.playersdk.audioplayer.view.AudioPlayer
+    <com.github.nabin0.audioplayer.view.AudioPlayer
         android:id="@+id/audioPlayer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

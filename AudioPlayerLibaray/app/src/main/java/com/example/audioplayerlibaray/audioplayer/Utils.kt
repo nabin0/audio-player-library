@@ -1,14 +1,14 @@
-package com.vl.vlplayer.demo.audioplayer
+package com.example.audioplayerlibaray.audioplayer
 
 import android.net.Uri
-import com.vl.viewlift.playersdk.audioplayer.models.Audio
+import com.github.nabin0.audioplayer.models.Audio
 
 object Utils {
     var SHOW_MINI_PLAYER = false
     var CURRENT_AUDIO_INDEX = -1
 
     val sampleAudioList = listOf(
-        Audio(
+        com.github.nabin0.audioplayer.models.Audio(
             1L,
             Uri.parse("https://audio.jukehost.co.uk/VgRsaqsm6pq9usbsOXipERF9dgBYwwGP"),
             "",
@@ -17,7 +17,7 @@ object Utils {
             "Ringtone 1",
             "",
             0
-        ), Audio(
+        ), com.github.nabin0.audioplayer.models.Audio(
             2L,
             Uri.parse("https://audio.jukehost.co.uk/232UbyB4GT5jnoBTnm75I1vDy9G7FYvR"),
             "",
@@ -26,7 +26,7 @@ object Utils {
             "Ringtone 2",
             "",
             0
-        ), Audio(
+        ), com.github.nabin0.audioplayer.models.Audio(
             101L,
             Uri.parse("https://audio.jukehost.co.uk/9YZDpnZ1JtabA78mh21x2nmvMxUbfwmi"),
             "",
@@ -35,7 +35,7 @@ object Utils {
             "Ringtone",
             "",
             0
-        ), Audio(
+        ), com.github.nabin0.audioplayer.models.Audio(
             3L,
             Uri.parse("https://audio.jukehost.co.uk/zG1wD3kJ8aCsw5iycu6f5ArvZyuhXDVu"),
             "",
@@ -47,7 +47,7 @@ object Utils {
         )
     )
 
-    val dummyAudioInstance = Audio(
+    val dummyAudioInstance = com.github.nabin0.audioplayer.models.Audio(
         0L, Uri.EMPTY, "", "", "", "", "", 0
     )
 

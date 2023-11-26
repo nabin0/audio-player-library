@@ -1,4 +1,4 @@
-package com.vl.vlplayer.demo.audioplayer.ui.theme
+package com.example.audioplayerlibaray.audioplayer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

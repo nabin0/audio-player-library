@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.nabin0.audioplayer.view.AudioPlayer
+        <com.github.nabin0.audioplayer.view.AudioPlayer
             android:id="@+id/audioPlayer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

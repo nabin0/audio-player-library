@@ -4,10 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
 import com.example.audioplayerlibaray.R
-import com.nabin0.audioplayer.view.AudioPlayer
-import com.vl.vlplayer.demo.audioplayer.AudioListFragment
-import com.vl.vlplayer.demo.audioplayer.Utils
-
+import com.github.nabin0.audioplayer.view.AudioPlayer
 class ActivityAudioPlayerDemo : AppCompatActivity() {
 
     private val fragmentManager = supportFragmentManager

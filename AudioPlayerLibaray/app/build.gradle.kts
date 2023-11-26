@@ -1,7 +1,9 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("jacoco")
 }
+//apply(from = "../jacoco.gradle")
 
 android {
     namespace = "com.example.audioplayerlibaray"
@@ -16,6 +18,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 
     buildTypes {
         release {
@@ -24,6 +29,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            enableAndroidTestCoverage = true
+            enableUnitTestCoverage = true
         }
     }
     compileOptions {
@@ -36,14 +45,16 @@ android {
 }
 
 dependencies {
-
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(project(mapOf("path" to ":audioplayer")))
     testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:core-ktx:1.5.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -59,5 +70,8 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
 //    debugImplementation 'androidx.compose.ui:ui-test-manifest'
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("org.jacoco:org.jacoco.core:0.8.10")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.mediarouter:mediarouter:1.6.0")
+    implementation("com.google.android.gms:play-services-cast-framework:21.3.0")
 }
