@@ -9,7 +9,7 @@ data class Audio(
     val id: Long,
     val audioUri: Uri,
     val displayName: String,
-    val albumArtUrl: String,
+    val albumArtUrl: String?,
     val artist: String,
     val title: String,
     val data: String,

@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
 class AudioPlayer : FrameLayout, AudioPlayerEventListener {
 
     private var activityInstance: FragmentActivity? = null
-    var mContext: Context = context
+    private var mContext: Context = context
     private lateinit var audioPlayerHelper: AudioPlayerHelper
     private var inflatedResourceId: Int? = null
     private var audioChromeCastFeature: AudioChromeCastFeature? = null
@@ -103,7 +103,7 @@ class AudioPlayer : FrameLayout, AudioPlayerEventListener {
         textAudioTitle = findViewById(R.id.textAudioTitle)
         textArtist = findViewById(R.id.textArtist)
 //        mediaRouteButton = findViewById(R.id.mediaRouteButton)
-//        playBackModeButton = findViewById(R.id.playBackModeButton)
+        playBackModeButton = findViewById(R.id.playBackModeButton)
 
         val playbackMode = audioPlayerHelper.getCurrentPlaybackMode()
         setPlaybackModeButtonResource(playbackMode)

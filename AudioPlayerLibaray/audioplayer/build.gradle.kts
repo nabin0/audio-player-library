@@ -68,18 +68,9 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    //androidTestImplementation 'org.mockito:mockito-core:4.2.0'
-    //androidTestImplementation 'org.mockito:mockito-android:4.6.1'
-//    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    //   androidTestImplementation 'org.mockito:mockito-inline:3.4.0'
-    // androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito-inline-extended:2.28.1"
-    //   testImplementation('org.mockito:mockito-inline:3.4.0')
-    //   testImplementation 'org.powermock:powermock:1.6.5'
-    //   testImplementation 'org.powermock:powermock-module-junit4:1.6.5'
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
     testImplementation("org.robolectric:robolectric:4.8.1")
-//    androidTestImplementation("org.robolectric:robolectric:4.8.1")
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
     testImplementation("androidx.test.ext:junit-ktx:1.1.5")
@@ -96,11 +87,7 @@ dependencies {
 
     implementation("androidx.media3:media3-exoplayer-ima:1.2.0")
     implementation("androidx.media3:media3-exoplayer:1.2.0")
-//    implementation("androidx.media3:media3-exoplayer-dash:1.2.0")
-//    implementation("androidx.media3:media3-exoplayer-smoothstreaming:1.1.0")
-//    implementation("androidx.media3:media3-exoplayer-hls:1.1.0")
     implementation("androidx.media3:media3-ui:1.2.0")
-//    implementation("androidx.media3:media3-cast:1.1.0")
     implementation("androidx.media3:media3-session:1.2.0")
     implementation("org.jacoco:org.jacoco.core:0.8.10")
     implementation("androidx.mediarouter:mediarouter:1.6.0")

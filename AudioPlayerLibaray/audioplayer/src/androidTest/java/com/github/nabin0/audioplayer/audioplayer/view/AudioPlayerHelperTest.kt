@@ -16,10 +16,12 @@ import com.github.nabin0.audioplayer.CustomServiceTestRule
 import com.github.nabin0.audioplayer.audioplayer.Utils.sampleAudioList
 import com.github.nabin0.audioplayer.utils.ExoPlayerHelper
 import com.github.nabin0.audioplayer.utils.PlaybackMode
+import com.github.nabin0.audioplayer.view.AudioPlayerHelper
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.spyk
 import io.mockk.verify
@@ -91,7 +93,10 @@ class AudioPlayerHelperTest {
     @Test
     fun test_getCurrentTrackDuration() {
         every { simpleExoPlayer.duration }.returns(1234L)
-        val mAssert = audioPlayerHelper.currentTrackDuration == 1234L
+        var mAssert = audioPlayerHelper.currentTrackDuration == 1234L
+        assert(mAssert)
+        audioPlayerHelper.player = null
+        mAssert = audioPlayerHelper.currentTrackDuration == 0L
         assert(mAssert)
     }
 
@@ -172,8 +177,9 @@ class AudioPlayerHelperTest {
         verify { simpleExoPlayer.setMediaItems(mediaItemList) }
     }
 
+    @Test
     fun test_addPlaylist() {
-        var mediaItemList: List<MediaItem>
+        var mediaItemList: List<MediaItem> = mutableListOf()
         sampleAudioList.map { audio ->
             var artWorkUri: Uri? = null
             try {
@@ -189,13 +195,13 @@ class AudioPlayerHelperTest {
         }.also {
             mediaItemList = it
         }
-        every { simpleExoPlayer.setMediaItems(any()) }.returns(Unit)
         every { simpleExoPlayer.addMediaItems(any()) }.returns(Unit)
-        audioPlayerHelper.setAudioPlaylist(sampleAudioList)
+        every { simpleExoPlayer.prepare() }.returns(Unit)
         audioPlayerHelper.addAudioPlaylist(sampleAudioList)
         verify { simpleExoPlayer.addMediaItems(mediaItemList) }
         audioPlayerHelper.addMediaItemPlaylist(mediaItemList)
         verify { simpleExoPlayer.addMediaItems(mediaItemList) }
+        verify { simpleExoPlayer.prepare() }
     }
 
 
@@ -248,22 +254,26 @@ class AudioPlayerHelperTest {
 
     @Test
     fun test_togglePlayPauseEvent() {
-        every { simpleExoPlayer.isPlaying } returns true
+        every { simpleExoPlayer?.isPlaying } returns true
         audioPlayerHelper.togglePlayPauseEvent()
         verify { simpleExoPlayer.playWhenReady = false }
-        // every { simpleExoPlayer.isPlaying } returns false
-        // audioPlayerHelper.togglePlayPauseEvent()
-        // verify { simpleExoPlayer.playWhenReady = true }
+        every { simpleExoPlayer.isPlaying } returns false
+        audioPlayerHelper.togglePlayPauseEvent()
+        verify { simpleExoPlayer.playWhenReady = true }
     }
 
 
     @Test
     fun test_startForegroundService() {
-        val mockContext = spyk(mContext)
-//        mockkClass(AudioPlayerService::class)
-//        every { mockContext.startForegroundService(any()) }.returns(null)
+        val mockkAudioPlayerHelper = mockk<AudioPlayerHelper>()
+//        every { simpleExoPlayer.addMediaItems(any()) }.returns(Unit)
+//        audioPlayerHelper.initializePlayer(mContext)
+//        audioPlayerHelper.addAudioPlaylist(sampleAudioList)
+//        audioPlayerHelper.prepare()
+//        every { mockkAudioPlayerHelper.startForegroundService() }.returns(Unit)
 //        audioPlayerHelper.startForegroundService()
 //        verify { AudioPlayerService.isServiceRunning }
+
     }
 
     @Test
@@ -278,7 +288,10 @@ class AudioPlayerHelperTest {
         every { simpleExoPlayer.stop() }.returns(Unit)
         every { simpleExoPlayer.release() }.returns(Unit)
         every { ExoPlayerHelper.release() }.returns(Unit)
-        audioPlayerHelper.destroy()
+        val mockkAudioPlayerHelper = spyk(audioPlayerHelper)
+        mockkAudioPlayerHelper.destroy()
+        every { mockkAudioPlayerHelper.isMyServiceRunning(any()) }.returns(false)
+        mockkAudioPlayerHelper.destroy()
         verify { ExoPlayerHelper.release() }
     }
 
@@ -287,7 +300,7 @@ class AudioPlayerHelperTest {
         every { simpleExoPlayer.playWhenReady = any() }.returns(Unit)
         audioPlayerHelper.setAutoPlayEnabled(true)
         verify { simpleExoPlayer.playWhenReady = true }
+        audioPlayerHelper.setAutoPlayEnabled(false)
+        verify { simpleExoPlayer.playWhenReady = false }
     }
-
-
 }

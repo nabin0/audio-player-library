@@ -2,6 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("jacoco")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+
 }
 //apply(from = "../jacoco.gradle")
 
@@ -35,6 +38,12 @@ android {
             enableUnitTestCoverage = true
         }
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.2"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -45,6 +54,7 @@ android {
 }
 
 dependencies {
+    val composeUiVersion = "1.5.4"
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -63,15 +73,33 @@ dependencies {
     implementation("androidx.compose.animation:animation:1.5.4")
     implementation("androidx.compose.ui:ui-tooling:1.5.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.compose.ui:ui:$composeUiVersion")
+    implementation("androidx.compose.ui:ui-tooling-preview:$composeUiVersion")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUiVersion")
+    debugImplementation("androidx.compose.ui:ui-tooling:$composeUiVersion")
+    debugImplementation("androidx.compose.ui:ui-tooling-preview:$composeUiVersion")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeUiVersion")
+
 
     implementation("com.github.bumptech.glide:glide:4.15.0")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
-//    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("org.jacoco:org.jacoco.core:0.8.10")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("androidx.mediarouter:mediarouter:1.6.0")
     implementation("com.google.android.gms:play-services-cast-framework:21.3.0")
+    implementation("org.jacoco:org.jacoco.core:0.8.10")
+
+    val daggerHiltVersion = "2.44"
+//    implementation("androidx.hilt:hilt-compiler:1.0.0-alpha01")
+    implementation("com.google.dagger:hilt-android:$daggerHiltVersion")
+    kapt("com.google.dagger:hilt-android-compiler:$daggerHiltVersion")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 }

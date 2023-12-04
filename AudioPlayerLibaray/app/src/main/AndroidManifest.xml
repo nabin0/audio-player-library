@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".audioplayer.App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,7 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioPlayerLibaray"
         tools:targetApi="31">
-        <activity android:name=".audioplayer.ActivityAudioPlayerDemo" android:exported="true"/>
+        <activity
+            android:name=".audioplayer.ActivityAudioPlayerDemo"
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"
@@ -23,6 +26,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".audioplayer.compose_demo.ComposePlayerActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

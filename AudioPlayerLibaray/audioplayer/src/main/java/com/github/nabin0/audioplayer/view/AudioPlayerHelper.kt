@@ -22,6 +22,7 @@ import com.github.nabin0.audioplayer.utils.PlaybackMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.lang.reflect.Modifier
+import java.lang.reflect.Modifier.PRIVATE
 
 /**
  * This contains all the code related to audio control.
@@ -81,7 +82,8 @@ import java.lang.reflect.Modifier
         mContext.stopService(intent)
     }
 
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+    @VisibleForTesting(otherwise = PRIVATE)
+    internal fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
         val manager =
             mContext.getSystemService(AppCompatActivity.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
