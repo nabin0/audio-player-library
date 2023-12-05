@@ -4,7 +4,6 @@ plugins {
     id("maven-publish")
     id("kotlin-android")
     id("kotlin-kapt")
-//    id("kotlinx-serialization")
     id("kotlin-parcelize")
 }
 
@@ -92,4 +91,17 @@ dependencies {
     implementation("org.jacoco:org.jacoco.core:0.8.10")
     implementation("androidx.mediarouter:mediarouter:1.6.0")
     implementation("com.google.android.gms:play-services-cast-framework:21.3.0")
+}
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.github.nabin0"
+            artifactId = "media3-AudioPlayer"
+            version = "1.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
