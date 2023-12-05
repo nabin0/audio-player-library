@@ -27,6 +27,10 @@ dependencyResolutionManagement {
 ```
 Implement library in your app level build.gradle:
 
-`implementation 'com.example:youraudioplayer:1.0.0'`
+```
+dependencies {
+	implementation 'com.github.nabin0:audio-player-library:Tag'
+}
+```
 
 
