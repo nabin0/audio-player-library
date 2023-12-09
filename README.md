@@ -1,9 +1,4 @@
 
-# Project Title
-
-A brief description of what this project does and who it's for
-
-
 # Audioplayer Library
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
