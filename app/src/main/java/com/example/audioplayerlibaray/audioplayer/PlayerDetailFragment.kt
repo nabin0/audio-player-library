@@ -39,7 +39,8 @@ class PlayerDetailFragment : Fragment() {
         // audioPlayer = AudioPlayerUtil.getAudioPlayer(requireActivity())
 
         audioPlayer = view.findViewById(R.id.audioPlayer)
-        audioPlayer?.setChromecastEnabled(true)
+        // activity?.let { audioPlayer?.setActivityInstance(it) }
+        // audioPlayer?.setChromecastEnabled(true)
 
 // ------ Testing ------
 

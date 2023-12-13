@@ -87,7 +87,7 @@ class AudioPlayer : FrameLayout, AudioPlayerEventListener {
     private fun initializePlayerView(layoutResourceId: Int?) {
         audioPlayerHelper = ExoPlayerHelper.getAudioPlayerHelperInstance(mContext)
 
-        val layoutId = layoutResourceId ?: R.layout.audio_player_control
+        val layoutId = layoutResourceId ?: R.layout.audio_full_screen_player_custom_layout
         inflatedResourceId = layoutResourceId
         LayoutInflater.from(mContext).inflate(layoutId, this)
 
@@ -102,7 +102,7 @@ class AudioPlayer : FrameLayout, AudioPlayerEventListener {
         progressBar = findViewById(R.id.progressBar)
         textAudioTitle = findViewById(R.id.textAudioTitle)
         textArtist = findViewById(R.id.textArtist)
-//        mediaRouteButton = findViewById(R.id.mediaRouteButton)
+        // mediaRouteButton = findViewById(R.id.mediaRouteButton)
         playBackModeButton = findViewById(R.id.playBackModeButton)
 
         val playbackMode = audioPlayerHelper.getCurrentPlaybackMode()
@@ -127,19 +127,6 @@ class AudioPlayer : FrameLayout, AudioPlayerEventListener {
             audioPlayerHelper.setPlaybackMode(newPlayBackMode)
             setPlaybackModeButtonResource(newPlayBackMode)
 
-        }
-
-        if (activityInstance != null)
-            AudioChromeCastFeature.init(activityInstance as AppCompatActivity)
-        if (AudioChromeCastFeature.isChromeCastEnable()) {
-            audioChromeCastFeature = AudioChromeCastFeature.apply {
-                setupCastListener(this@AudioPlayer)
-                registerSessionListener()
-            }
-        }
-
-        mediaRouteButton?.let {
-            AudioChromeCastFeature.setUpMediaRouteButton(it)
         }
 
         if (audioPlayerHelper.buffering) {
@@ -192,6 +179,17 @@ class AudioPlayer : FrameLayout, AudioPlayerEventListener {
 
     fun setActivityInstance(activityInstance: FragmentActivity) {
         this.activityInstance = activityInstance
+
+        AudioChromeCastFeature.init(activityInstance as FragmentActivity)
+        if (AudioChromeCastFeature.isChromeCastEnable()) {
+            audioChromeCastFeature = AudioChromeCastFeature.apply {
+                setupCastListener(this@AudioPlayer)
+                registerSessionListener()
+            }
+        }
+        mediaRouteButton?.let {
+            AudioChromeCastFeature.setUpMediaRouteButton(it)
+        }
     }
 
     fun setCustomLayout(layoutResourceId: Int) {

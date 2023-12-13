@@ -35,7 +35,7 @@ fun AudioPlayerFullScreen(
                 }
             },
             update = {
-                audioPlayer?.setCustomLayout(R.layout.audio_full_screen_player_custom_layout)
+//                audioPlayer?.setCustomLayout(R.layout.audio_full_screen_player_custom_layout)
                 audioPlayer?.setChromecastEnabled(true)
                 audioPlayer?.prepare()
                 audioPlayer?.setAutoPlayEnabled(true)

@@ -162,8 +162,8 @@ fun AudioItem(audio: Audio, onItemClick: () -> Unit) {
                 style = TextStyle(color = Color.White.copy(0.7f))
             )
             Spacer(modifier = Modifier.height(4.dp))
-            androidx.compose.material.Text(
-                text = audio.title,
+            Text(
+                text = audio.title.toString(),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = TextStyle(color = Color.White)
@@ -178,7 +178,7 @@ fun AudioItem(audio: Audio, onItemClick: () -> Unit) {
                     modifier = Modifier.padding(end = 8.dp)
                 )
                 androidx.compose.material.Text(
-                    text = TimeUtil.formatTime(audio.duration.toLong()),
+                    text = TimeUtil.formatTime(audio.duration?.toLong()?: 0L),
                     style = TextStyle(color = Color.White.copy(0.5f))
                 )
                 Spacer(modifier = Modifier.weight(1f))

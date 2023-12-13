@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:textColor="@color/white"
+        android:textColor="@color/white_color"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/audioSeekBar"
@@ -35,7 +35,7 @@
         android:id="@+id/textArtist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        android:textColor="@color/white_color"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/audioSeekBar"
@@ -49,10 +49,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:backgroundTint="@color/white"
-        android:progressBackgroundTint="@color/white"
-        android:progressTint="@color/white"
-        android:thumbTint="@color/white"
+        android:backgroundTint="@color/white_color"
+        android:progressBackgroundTint="@color/white_color"
+        android:progressTint="@color/white_color"
+        android:thumbTint="@color/white_color"
         app:layout_constraintBottom_toTopOf="@+id/audioControlContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +64,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:textColor="@color/white"
+        android:textColor="@color/white_color"
         app:layout_constraintStart_toStartOf="@id/audioSeekBar"
         app:layout_constraintTop_toBottomOf="@id/audioSeekBar" />
 
@@ -73,7 +73,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:textColor="@color/white"
+        android:textColor="@color/white_color"
         app:layout_constraintEnd_toEndOf="@id/audioSeekBar"
         app:layout_constraintTop_toBottomOf="@id/audioSeekBar" />
 
@@ -81,7 +81,6 @@
         android:id="@+id/audioControlContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:clickable="false"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -92,10 +91,11 @@
         android:gravity="center_vertical">
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/mediaRouteButton"
+            android:id="@+id/playBackSpeed"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_margin="0dp"
+            android:background="@drawable/quantum_ic_pause_white_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/previousButton"
             app:layout_constraintHorizontal_bias="0.0"
@@ -108,10 +108,10 @@
             android:layout_height="40dp"
             app:layout_constraintEnd_toStartOf="@id/playbackControlContainer"
             android:background="@drawable/quantum_ic_skip_previous_white_24"
-            app:layout_constraintStart_toEndOf="@id/mediaRouteButton"
-            app:layout_constraintTop_toTopOf="@id/mediaRouteButton"
-            app:layout_constraintBottom_toBottomOf="@id/mediaRouteButton"
-            android:tint="@color/white" />
+            app:layout_constraintStart_toEndOf="@id/playBackSpeed"
+            app:layout_constraintTop_toTopOf="@id/playBackSpeed"
+            app:layout_constraintBottom_toBottomOf="@id/playBackSpeed"
+            android:tint="@color/white_color" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/playbackControlContainer"
@@ -127,8 +127,8 @@
                 android:id="@+id/playButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:tint="@color/white"
-                android:background="@drawable/ic_play_24dp"
+                android:tint="@color/white_color"
+                android:background="@drawable/quantum_ic_play_arrow_white_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -150,9 +150,9 @@
                 android:id="@+id/pauseButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:tint="@color/white"
+                android:tint="@color/white_color"
                 android:visibility="gone"
-                android:background="@drawable/ic_pause_24dp"
+                android:background="@drawable/quantum_ic_pause_white_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -169,7 +169,7 @@
             app:layout_constraintBottom_toBottomOf="@id/playbackControlContainer"
             app:layout_constraintStart_toEndOf="@id/playbackControlContainer"
             android:background="@drawable/quantum_ic_skip_next_white_24"
-            android:tint="@color/white" />
+            android:tint="@color/white_color" />
 
 
         <androidx.appcompat.widget.AppCompatImageButton
@@ -177,8 +177,8 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
-            android:tint="@color/white"
+            android:backgroundTint="@color/white_color"
+            android:tint="@color/white_color"
             android:background="@color/transparentColor"
             app:layout_constraintBottom_toBottomOf="@id/nextButton"
             app:layout_constraintEnd_toEndOf="parent"
