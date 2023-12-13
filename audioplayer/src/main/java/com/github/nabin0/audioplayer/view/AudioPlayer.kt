@@ -86,7 +86,7 @@ class AudioPlayer : FrameLayout, AudioPlayerEventListener {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun initializePlayerView(layoutResourceId: Int?) {
         audioPlayerHelper = ExoPlayerHelper.getAudioPlayerHelperInstance(mContext)
-
+        currentPlayingMediaIndex = audioPlayerHelper.currentPlayingMediaIndex
         val layoutId = layoutResourceId ?: R.layout.audio_full_screen_player_custom_layout
         inflatedResourceId = layoutResourceId
         LayoutInflater.from(mContext).inflate(layoutId, this)

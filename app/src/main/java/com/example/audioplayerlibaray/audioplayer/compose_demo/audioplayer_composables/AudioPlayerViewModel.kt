@@ -71,12 +71,13 @@ class AudioPlayerViewModel @Inject constructor(
         0L, Uri.EMPTY, "", "", "", "", "", 0
     )
 
-    fun getAudioPlayer(context: Context) {
+    fun getAudioPlayer(context: Context): AudioPlayer {
         audioPlayer = audioPlayer ?: AudioPlayer(context = context).apply {
             initializePlayer()
             setPlaylist(sampleAudioList)
             removeCallbacks()
         }
+        return audioPlayer as AudioPlayer
     }
 
     val currentPlayingAudioIndex = audioPlayer?.currentPlayingMediaIndex ?: MutableStateFlow(-1)

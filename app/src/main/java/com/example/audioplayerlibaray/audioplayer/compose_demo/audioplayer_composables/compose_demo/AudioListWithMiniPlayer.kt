@@ -1,6 +1,7 @@
 package com.example.audioplayerlibaray.audioplayer.compose_demo.audioplayer_composables.compose_demo
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,11 +51,12 @@ fun AudioListWithMiniPlayer(
     audioPlayerViewModel: AudioPlayerViewModel,
     navigateToFullScreen: (index: Int) -> Unit,
 ) {
-
     val listState = rememberLazyListState()
-    val currentPlayingAudioIndex by audioPlayerViewModel.currentPlayingAudioIndex.collectAsState()
-    val mContext = LocalContext.current as Activity
 
+    val mContext = LocalContext.current as Activity
+    val currentPlayingAudioIndex by (audioPlayerViewModel.getAudioPlayer(mContext).currentPlayingMediaIndex).collectAsState()
+
+    Log.d("TAG", "AudioListWithMiniPlayer: $currentPlayingAudioIndex")
     LaunchedEffect(Unit) {
         audioPlayerViewModel.getAudioPlayer(mContext)
     }
@@ -75,13 +77,10 @@ fun AudioListWithMiniPlayer(
                 .fillMaxSize()
                 .padding(it)
         ) {
-            val playingAudio = if (currentPlayingAudioIndex != -1) {
-                audioPlayerViewModel.sampleAudioList[currentPlayingAudioIndex]
-            } else audioPlayerViewModel.dummyAudioInstance
             itemsIndexed(audioPlayerViewModel.sampleAudioList) { index, audio ->
                 AudioItem(audio = audio, onItemClick = {
                     navigateToFullScreen(index)
-                })
+                }, isCurrentPlayingAudioIndex = (currentPlayingAudioIndex == index))
             }
         }
     }
@@ -136,11 +135,12 @@ fun CustomArtImage(albumArtUrl: String, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun AudioItem(audio: Audio, onItemClick: () -> Unit) {
+fun AudioItem(audio: Audio, onItemClick: () -> Unit, isCurrentPlayingAudioIndex: Boolean) {
+    val color = if(!isCurrentPlayingAudioIndex)Color(0xFF0D2148) else Color(0xFFDA21A8)
     Row(
         modifier = Modifier
             .padding(vertical = 4.dp)
-            .background(Color(0xFF0D2148))
+            .background(color)
             .fillMaxWidth()
             .clickable {
                 onItemClick.invoke()
