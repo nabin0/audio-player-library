@@ -6,7 +6,6 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
 }
-
 android {
     namespace = "com.github.nabin0.audioplayer"
     compileSdk = 34
@@ -57,6 +56,9 @@ android {
         jvmTarget = "17"
     }
 }
+tasks.withType<Test>{
+    useJUnitPlatform()
+}
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -66,7 +68,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    testImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
     testImplementation("org.robolectric:robolectric:4.8.1")
@@ -76,6 +78,7 @@ dependencies {
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation("androidx.test:runner:1.5.2")
+    testImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
     testImplementation("io.mockk:mockk:1.13.3")
     androidTestImplementation("io.mockk:mockk-android:1.13.3")

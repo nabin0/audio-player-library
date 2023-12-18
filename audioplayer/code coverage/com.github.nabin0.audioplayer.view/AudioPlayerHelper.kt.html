@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AudioPlayerHelper.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.github.nabin0.audioplayer.view</a> &gt; <span class="el_source">AudioPlayerHelper.kt</span></div><h1>AudioPlayerHelper.kt</h1><pre class="source lang-java linenums">package com.github.nabin0.audioplayer.view
+
+import android.app.ActivityManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import com.github.nabin0.audioplayer.events.AudioPlayerEventBus
+import com.github.nabin0.audioplayer.models.Audio
+import com.github.nabin0.audioplayer.service.AudioPlayerService
+import com.github.nabin0.audioplayer.utils.Constants
+import com.github.nabin0.audioplayer.utils.ExoPlayerHelper
+import com.github.nabin0.audioplayer.utils.PlaybackMode
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.lang.reflect.Modifier
+import java.lang.reflect.Modifier.PRIVATE
+
+/**
+ * This contains all the code related to audio control.
+ *
+ * @param mContext: a valid context should be passed
+ */
+<span class="fc" id="L32">@VisibleForTesting(otherwise = Modifier.PROTECTED) class AudioPlayerHelper(private val mContext: Context) : Player.Listener {</span>
+
+    private var autoPlayEnabled: Boolean = false
+<span class="fc" id="L35">    var player: ExoPlayer? = null</span>
+<span class="nc" id="L36">    var buffering = false</span>
+
+<span class="fc" id="L38">    private var handler = Handler(Looper.getMainLooper())</span>
+<span class="fc" id="L39">    private var updateProgressRunnable = Runnable {</span>
+<span class="fc" id="L40">        updateCurrentPosition()</span>
+<span class="fc" id="L41">    }</span>
+
+<span class="fc" id="L43">    private val _currentPlayingMediaIndex = MutableStateFlow(-1)</span>
+<span class="pc" id="L44">    val currentPlayingMediaIndex = _currentPlayingMediaIndex.asStateFlow()</span>
+
+    fun prepare() {
+<span class="fc" id="L47">        try {</span>
+<span class="fc" id="L48">            player!!.prepare()</span>
+<span class="fc" id="L49">            player!!.playWhenReady = false</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">            if (autoPlayEnabled) {</span>
+<span class="nc" id="L51">                play()</span>
+            }
+<span class="nc" id="L53">        } catch (e: Exception) {</span>
+<span class="nc" id="L54">            e.printStackTrace()</span>
+        }
+<span class="fc" id="L56">        updateCurrentPosition()</span>
+<span class="fc" id="L57">    }</span>
+
+    fun initializePlayer(context: Context) {
+<span class="fc" id="L60">        player = ExoPlayerHelper.getExoplayerInstance(mContext).apply {</span>
+<span class="fc" id="L61">            addListener(this@AudioPlayerHelper)</span>
+<span class="fc" id="L62">            playWhenReady = false</span>
+<span class="fc" id="L63">        }</span>
+<span class="fc" id="L64">    }</span>
+
+    /**
+     * Starts a foreground service to show media notification
+     */
+    fun startForegroundService() {
+<span class="nc" id="L70">        val intent = Intent(mContext.applicationContext, AudioPlayerService::class.java)</span>
+<span class="nc" id="L71">        intent.action = Constants.APP_IN_FOREGROUND</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {</span>
+<span class="nc" id="L73">            mContext.startForegroundService(intent)</span>
+        } else {
+<span class="nc" id="L75">            mContext.startService(intent)</span>
+        }
+<span class="nc" id="L77">    }</span>
+
+    private fun stopForegroundService() {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (!isMyServiceRunning(AudioPlayerService::class.java)) return</span>
+<span class="fc" id="L81">        val intent = Intent(mContext, AudioPlayerService::class.java)</span>
+<span class="fc" id="L82">        mContext.stopService(intent)</span>
+<span class="fc" id="L83">    }</span>
+
+    @VisibleForTesting(otherwise = PRIVATE)
+    internal fun isMyServiceRunning(serviceClass: Class&lt;*&gt;): Boolean {
+<span class="fc" id="L87">        val manager =</span>
+<span class="fc" id="L88">            mContext.getSystemService(AppCompatActivity.ACTIVITY_SERVICE) as ActivityManager</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        for (service in manager.getRunningServices(Int.MAX_VALUE)) {</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">            if (serviceClass.name == service.service.className) {</span>
+<span class="fc" id="L91">                return true</span>
+            }
+        }
+<span class="nc" id="L94">        return false</span>
+    }
+
+    private fun hideNotification() {
+<span class="fc" id="L98">        val intent = Intent(mContext, AudioPlayerService::class.java)</span>
+<span class="fc" id="L99">        intent.action = Constants.STOP_FOREGROUND_SERVICE</span>
+<span class="fc" id="L100">        mContext.startService(intent)</span>
+<span class="fc" id="L101">    }</span>
+
+    fun progressSeekTo(seekValue: Long) {
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        player?.seekTo(seekValue)</span>
+<span class="fc" id="L105">        updateCurrentPosition()</span>
+<span class="fc" id="L106">    }</span>
+
+    /**
+     * Emits current position value in millis
+     */
+    private fun updateCurrentPosition() {
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        val currentPosition = player?.currentPosition ?: 0</span>
+<span class="fc" id="L113">        var duration = currentTrackDuration</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (duration &lt;= 0) duration = 0</span>
+
+<span class="fc" id="L116">        AudioPlayerEventBus.instance.onUpdateSeekBar(currentPosition, duration)</span>
+<span class="fc" id="L117">        handler.postDelayed(updateProgressRunnable, 60)</span>
+<span class="fc" id="L118">    }</span>
+
+    fun setAutoPlayEnabled(boolean: Boolean) {
+<span class="fc" id="L121">        autoPlayEnabled = boolean</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        player?.playWhenReady = boolean</span>
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Plays selected media item from the playlist assigned to it
+     *
+     * @param index  Index of the mediaitem you want to play
+     */
+    fun playMediaItemByIndex(index: Int) {
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (player != null) {</span>
+<span class="fc" id="L132">            _currentPlayingMediaIndex.value = index</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            val mediaMetadata = player?.mediaMetadata</span>
+<span class="fc" id="L134">            sendMediaMetadata(mediaMetadata)</span>
+<span class="pc bpc" id="L135" title="4 of 8 branches missed.">            if (player?.currentMediaItemIndex != index) player?.seekToDefaultPosition(index)</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">            if (autoPlayEnabled) play()</span>
+        }
+<span class="fc" id="L138">    }</span>
+
+    fun play() {
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if (player != null) {</span>
+<span class="fc" id="L142">            AudioPlayerEventBus.instance.triggerPlayEvent()</span>
+<span class="fc" id="L143">            player!!.playWhenReady = true</span>
+        }
+<span class="fc" id="L145">    }</span>
+
+    fun pause() {
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if (player != null) {</span>
+<span class="fc" id="L149">            hideNotification()</span>
+<span class="fc" id="L150">            player!!.playWhenReady = false</span>
+        }
+<span class="fc" id="L152">    }</span>
+
+    fun playNextFromList() {
+<span class="pc bpc" id="L155" title="3 of 6 branches missed.">        if (player?.hasNextMediaItem() == true) {</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            player?.seekToNextMediaItem()</span>
+        }
+<span class="fc" id="L158">    }</span>
+
+    fun playPreviousFromList() {
+<span class="pc bpc" id="L161" title="3 of 6 branches missed.">        if (player?.hasPreviousMediaItem() == true) {</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            player?.seekToPreviousMediaItem()</span>
+        }
+<span class="fc" id="L164">    }</span>
+
+    fun currentPayingMediaIndex(): Int {
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        _currentPlayingMediaIndex.value = player?.currentMediaItemIndex ?: -1</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        return player?.currentMediaItemIndex ?: -1</span>
+    }
+
+<span class="pc bpc" id="L171" title="2 of 4 branches missed.">    fun isPlaying(): Boolean = player?.isPlaying == true</span>
+
+    fun togglePlayPauseEvent() {
+<span class="pc bpc" id="L174" title="1 of 6 branches missed.">        if (player?.isPlaying == true) {</span>
+<span class="fc" id="L175">            pause()</span>
+<span class="fc" id="L176">            AudioPlayerEventBus.instance.triggerPauseEvent()</span>
+        } else {
+<span class="fc" id="L178">            play()</span>
+<span class="fc" id="L179">            AudioPlayerEventBus.instance.triggerPlayEvent()</span>
+        }
+<span class="fc" id="L181">    }</span>
+
+    /**
+     * Releases all the resources assigned related to the audio player
+     */
+    fun destroy() {
+<span class="fc" id="L187">        handler.removeCallbacks(updateProgressRunnable)</span>
+<span class="fc" id="L188">        stopForegroundService()</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">        if (player != null) {</span>
+<span class="pc bpc" id="L190" title="3 of 6 branches missed.">            if (player?.isPlaying == true) {</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">                player?.stop()</span>
+            }
+<span class="fc" id="L193">            player!!.release()</span>
+        }
+<span class="fc" id="L195">        ExoPlayerHelper.release()</span>
+<span class="fc" id="L196">    }</span>
+
+    fun setPlaybackMode(playbackMode: PlaybackMode) {
+<span class="pc bpc" id="L199" title="1 of 4 branches missed.">        if (playbackMode != PlaybackMode.SHUFFLE) player?.shuffleModeEnabled = false</span>
+<span class="pc bpc" id="L200" title="1 of 5 branches missed.">        when (playbackMode) {</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">            PlaybackMode.SHUFFLE -&gt; player?.shuffleModeEnabled = true</span>
+
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">            PlaybackMode.NO_REPEAT -&gt; player?.repeatMode = Player.REPEAT_MODE_OFF</span>
+
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">            PlaybackMode.REPEAT_CURRENT_AUDIO_INFINITELY -&gt; player?.repeatMode =</span>
+<span class="fc" id="L206">                Player.REPEAT_MODE_ONE</span>
+
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">            PlaybackMode.REPEAT_PLAYLIST -&gt; player?.repeatMode = Player.REPEAT_MODE_ALL</span>
+        }
+<span class="fc" id="L210">    }</span>
+
+    fun getCurrentPlaybackMode(): PlaybackMode {
+<span class="pc bpc" id="L213" title="1 of 6 branches missed.">        if (player?.shuffleModeEnabled == true) return PlaybackMode.SHUFFLE</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        when (player?.repeatMode) {</span>
+<span class="pc bpc" id="L215" title="1 of 4 branches missed.">            Player.REPEAT_MODE_OFF -&gt; {</span>
+<span class="fc" id="L216">                return PlaybackMode.NO_REPEAT</span>
+            }
+
+<span class="pc bpc" id="L219" title="1 of 4 branches missed.">            Player.REPEAT_MODE_ONE -&gt; {</span>
+<span class="fc" id="L220">                return PlaybackMode.REPEAT_CURRENT_AUDIO_INFINITELY</span>
+            }
+
+<span class="pc bpc" id="L223" title="2 of 4 branches missed.">            Player.REPEAT_MODE_ALL -&gt; {</span>
+<span class="fc" id="L224">                return PlaybackMode.REPEAT_PLAYLIST</span>
+            }
+        }
+<span class="nc" id="L227">        return PlaybackMode.NO_REPEAT</span>
+    }
+
+    val currentTrackDuration: Long
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        get() = if (player != null) {</span>
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">            player?.duration ?: 0L</span>
+        } else {
+<span class="fc" id="L234">            0L</span>
+<span class="fc" id="L235">        }</span>
+
+    /**
+     * Player Listener Method Implementation
+     */
+    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+<span class="nc" id="L241">    }</span>
+
+    override fun onPlaybackStateChanged(playbackState: Int) {
+<span class="nc bnc" id="L244" title="All 4 branches missed.">        when (playbackState) {</span>
+            Player.STATE_BUFFERING -&gt; {
+<span class="nc" id="L246">                buffering = true</span>
+<span class="nc" id="L247">                AudioPlayerEventBus.instance.triggerOnBuffer()</span>
+            }
+
+            Player.STATE_READY -&gt; {
+<span class="nc" id="L251">                buffering = false</span>
+<span class="nc" id="L252">                AudioPlayerEventBus.instance.triggerOnReady()</span>
+            }
+
+            Player.STATE_ENDED -&gt; {
+<span class="nc" id="L256">                buffering = false</span>
+            }
+
+            else -&gt; {}
+        }
+<span class="nc" id="L261">    }</span>
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+<span class="nc bnc" id="L264" title="All 2 branches missed.">        if (isPlaying) {</span>
+<span class="nc" id="L265">            AudioPlayerEventBus.instance.triggerPlayEvent()</span>
+        } else {
+<span class="nc" id="L267">            AudioPlayerEventBus.instance.triggerPauseEvent()</span>
+        }
+<span class="nc" id="L269">    }</span>
+
+    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+<span class="nc" id="L272">        _currentPlayingMediaIndex.value = currentPayingMediaIndex()</span>
+<span class="nc" id="L273">        sendMediaMetadata(mediaMetadata)</span>
+<span class="nc" id="L274">    }</span>
+
+    /**
+     * Emit event with latest metadata, called when the current playing audio is changed
+     *
+     * @param mediaMetadata = Metadata of the current playing song
+     */
+    private fun sendMediaMetadata(mediaMetadata: MediaMetadata?) {
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">        if (mediaMetadata == null) return</span>
+<span class="fc" id="L283">        AudioPlayerEventBus.instance.triggerOnMetadataChanged(mediaMetadata)</span>
+<span class="fc" id="L284">    }</span>
+
+    /**
+     * Removes the previous playlist if assigned to the player and sets the new audio playlist
+     *
+     * @param audioList = List of audio
+     */
+    fun setAudioPlaylist(audioList: List&lt;Audio&gt;) {
+<span class="fc" id="L292">        audioList.map { audio -&gt;</span>
+<span class="fc" id="L293">            var artWorkUri: Uri? = null</span>
+<span class="fc" id="L294">            try {</span>
+<span class="fc" id="L295">                artWorkUri = Uri.parse(audio.albumArtUrl)</span>
+<span class="fc" id="L296">            } catch (e: Exception) {</span>
+<span class="fc" id="L297">                e.printStackTrace()</span>
+            }
+
+<span class="fc" id="L300">            MediaItem.Builder().setUri(audio.audioUri).setMediaMetadata(</span>
+<span class="fc" id="L301">                MediaMetadata.Builder().setAlbumArtist(audio.artist).setTitle(audio.title)</span>
+<span class="fc" id="L302">                    .setDisplayTitle(audio.displayName).setSubtitle(audio.displayName)</span>
+<span class="fc" id="L303">                    .setArtworkUri(artWorkUri).build()</span>
+<span class="fc" id="L304">            ).build()</span>
+<span class="fc" id="L305">        }.also {</span>
+<span class="fc" id="L306">            setMediaItemPlaylist(it)</span>
+<span class="fc" id="L307">        }</span>
+<span class="fc" id="L308">    }</span>
+
+    fun setMediaItemPlaylist(mediaItemList: List&lt;MediaItem&gt;) {
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">        player?.setMediaItems(mediaItemList)</span>
+<span class="pc bpc" id="L312" title="1 of 2 branches missed.">        player?.prepare()</span>
+<span class="fc" id="L313">        _currentPlayingMediaIndex.value = -1</span>
+<span class="fc" id="L314">    }</span>
+
+    /**
+     * This method will add the media items to the previous playlist if already available
+     */
+    fun addAudioPlaylist(audioList: List&lt;Audio&gt;) {
+<span class="fc" id="L320">        audioList.map { audio -&gt;</span>
+<span class="fc" id="L321">            var artWorkUri: Uri? = null</span>
+<span class="fc" id="L322">            try {</span>
+<span class="fc" id="L323">                artWorkUri = Uri.parse(audio.albumArtUrl)</span>
+<span class="fc" id="L324">            } catch (e: Exception) {</span>
+<span class="fc" id="L325">                e.printStackTrace()</span>
+            }
+
+<span class="fc" id="L328">            MediaItem.Builder().setUri(audio.audioUri).setMediaMetadata(</span>
+<span class="fc" id="L329">                MediaMetadata.Builder().setAlbumArtist(audio.artist).setTitle(audio.title)</span>
+<span class="fc" id="L330">                    .setDisplayTitle(audio.displayName).setSubtitle(audio.displayName)</span>
+<span class="fc" id="L331">                    .setArtworkUri(artWorkUri).build()</span>
+<span class="fc" id="L332">            ).build()</span>
+<span class="fc" id="L333">        }.also {</span>
+<span class="fc" id="L334">            addMediaItemPlaylist(it)</span>
+<span class="fc" id="L335">        }</span>
+<span class="fc" id="L336">    }</span>
+
+    fun addMediaItemPlaylist(mediaItemList: List&lt;MediaItem&gt;) {
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">        player?.addMediaItems(mediaItemList)</span>
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        player?.prepare()</span>
+<span class="fc" id="L341">    }</span>
+
+    // Testing code
+    /*
+    private fun buildRenderersFactory(
+        context: Context, preferExtensionRenderer: Boolean,
+    ): RenderersFactory {
+        val extensionRendererMode =
+            if (preferExtensionRenderer) DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
+            else DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
+
+        return DefaultRenderersFactory(context.applicationContext).setExtensionRendererMode(
+            extensionRendererMode
+        ).setEnableDecoderFallback(true)
+    }
+
+    private fun getDataSourceFactory(context: Context): DataSource.Factory =
+        DefaultDataSource.Factory(context, getHttpDataSourceFactory(context))
+
+    private fun getHttpDataSourceFactory(context: Context): HttpDataSource.Factory {
+        var httpDataSourceFactory: HttpDataSource.Factory?
+
+        val cookieManager = CookieManager()
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER)
+        CookieHandler.setDefault(cookieManager)
+        httpDataSourceFactory = DefaultHttpDataSource.Factory()
+        return httpDataSourceFactory
+    }
+    */
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 8.1.2</div></body></html>

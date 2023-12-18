@@ -51,8 +51,8 @@ class AudioPlayerHelperTest {
         MockKAnnotations.init(this)
         mContext = ApplicationProvider.getApplicationContext()
 
-        mockkObject(com.github.nabin0.audioplayer.utils.ExoPlayerHelper)
-        every { com.github.nabin0.audioplayer.utils.ExoPlayerHelper.getExoplayerInstance(mContext) }.returns(
+        mockkObject(ExoPlayerHelper)
+        every { ExoPlayerHelper.getExoplayerInstance(mContext) }.returns(
             simpleExoPlayer
         )
 
@@ -73,7 +73,7 @@ class AudioPlayerHelperTest {
     fun test_isPlayerInitialized() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             verify {
-                com.github.nabin0.audioplayer.utils.ExoPlayerHelper.getExoplayerInstance(
+                ExoPlayerHelper.getExoplayerInstance(
                     mContext
                 )
             }
@@ -228,6 +228,7 @@ class AudioPlayerHelperTest {
 
     @Test
     fun test_playMediaItemByIndex() {
+        every { simpleExoPlayer.hasNextMediaItem() }.returns(false)
         every { simpleExoPlayer.seekToDefaultPosition(any()) } returns Unit
         every { simpleExoPlayer.currentMediaItemIndex } returns 0
         every { simpleExoPlayer.mediaMetadata }.returns(MediaMetadata.EMPTY)

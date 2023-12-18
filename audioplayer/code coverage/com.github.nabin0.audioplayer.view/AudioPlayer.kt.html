@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AudioPlayer.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.github.nabin0.audioplayer.view</a> &gt; <span class="el_source">AudioPlayer.kt</span></div><h1>AudioPlayer.kt</h1><pre class="source lang-java linenums">package com.github.nabin0.audioplayer.view
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.SeekBar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
+import androidx.media3.common.MediaMetadata
+import androidx.mediarouter.app.MediaRouteButton
+import com.bumptech.glide.Glide
+import com.github.nabin0.audioplayer.R
+import com.github.nabin0.audioplayer.events.AudioPlayerEventBus
+import com.github.nabin0.audioplayer.events.AudioPlayerEventListener
+import com.github.nabin0.audioplayer.models.Audio
+import com.github.nabin0.audioplayer.provider.AudioChromeCastFeature
+import com.github.nabin0.audioplayer.utils.ExoPlayerHelper
+import com.github.nabin0.audioplayer.utils.PlaybackMode
+import com.github.nabin0.audioplayer.utils.Utils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+/**
+ * AudioPlayer is the custom view for the management of audio with all controls given
+ *
+ * It provides methods to control creation and destruction of audioplayer instance and foreground service
+ *
+ *  @param context context of application or activity or FragmentActivity
+ *
+ */
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+class AudioPlayer : FrameLayout, AudioPlayerEventListener {
+
+    private var activityInstance: FragmentActivity? = null
+<span class="pc" id="L42">    private var mContext: Context = context</span>
+    private lateinit var audioPlayerHelper: AudioPlayerHelper
+    private var inflatedResourceId: Int? = null
+    private var audioChromeCastFeature: AudioChromeCastFeature? = null
+<span class="pc" id="L46">    var currentPlayingMediaIndex: StateFlow&lt;Int&gt; = MutableStateFlow(-1)</span>
+
+    // Views
+    private var albumImage: ImageView? = null
+    private var playButton: ImageButton? = null
+    private var pauseButton: ImageButton? = null
+    private var previousButton: ImageButton? = null
+    private var nextButton: ImageButton? = null
+    private var audioSeekBar: SeekBar? = null
+    private var textCurrentPosition: TextView? = null
+    private var textDuration: TextView? = null
+    private var progressBar: ProgressBar? = null
+    private var textAudioTitle: TextView? = null
+    private var textArtist: TextView? = null
+    private var playBackModeButton: ImageButton? = null
+    private var mediaRouteButton: MediaRouteButton? = null
+
+<span class="pc" id="L63">    init {</span>
+        // Register to listen the updates from audio player instance to update the view
+<span class="pc" id="L65">        AudioPlayerEventBus.instance.registerReceiver(this)</span>
+<span class="pc" id="L66">    }</span>
+
+<span class="fc" id="L68">    constructor(context: Context) : super(context) {</span>
+<span class="fc" id="L69">        this.mContext = context</span>
+<span class="fc" id="L70">        initializePlayerView(null)</span>
+<span class="fc" id="L71">    }</span>
+
+<span class="nc" id="L73">    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {</span>
+<span class="nc" id="L74">        this.mContext = context</span>
+<span class="nc" id="L75">        initializePlayerView(null)</span>
+<span class="nc" id="L76">    }</span>
+
+<span class="nc" id="L78">    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(</span>
+<span class="nc" id="L79">        context, attrs, defStyleAttr</span>
+    ) {
+<span class="nc" id="L81">        this.mContext = context</span>
+<span class="nc" id="L82">        initializePlayerView(null)</span>
+<span class="nc" id="L83">    }</span>
+
+
+    @SuppressLint(&quot;UnspecifiedRegisterReceiverFlag&quot;)
+    private fun initializePlayerView(layoutResourceId: Int?) {
+<span class="fc" id="L88">        audioPlayerHelper = ExoPlayerHelper.getAudioPlayerHelperInstance(mContext)</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        currentPlayingMediaIndex = audioPlayerHelper.currentPlayingMediaIndex</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        val layoutId = layoutResourceId ?: R.layout.audio_full_screen_player_custom_layout</span>
+<span class="fc" id="L91">        inflatedResourceId = layoutResourceId</span>
+<span class="fc" id="L92">        LayoutInflater.from(mContext).inflate(layoutId, this)</span>
+
+<span class="fc" id="L94">        albumImage = findViewById(R.id.albumImage)</span>
+<span class="fc" id="L95">        previousButton = findViewById(R.id.previousButton)</span>
+<span class="fc" id="L96">        nextButton = findViewById(R.id.nextButton)</span>
+<span class="fc" id="L97">        playButton = findViewById(R.id.playButton)</span>
+<span class="fc" id="L98">        pauseButton = findViewById(R.id.pauseButton)</span>
+<span class="fc" id="L99">        audioSeekBar = findViewById(R.id.audioSeekBar)</span>
+<span class="fc" id="L100">        textCurrentPosition = findViewById(R.id.textCurrentPosition)</span>
+<span class="fc" id="L101">        textDuration = findViewById(R.id.textAudioDuration)</span>
+<span class="fc" id="L102">        progressBar = findViewById(R.id.progressBar)</span>
+<span class="fc" id="L103">        textAudioTitle = findViewById(R.id.textAudioTitle)</span>
+<span class="fc" id="L104">        textArtist = findViewById(R.id.textArtist)</span>
+        // mediaRouteButton = findViewById(R.id.mediaRouteButton)
+<span class="fc" id="L106">        playBackModeButton = findViewById(R.id.playBackModeButton)</span>
+
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        val playbackMode = audioPlayerHelper.getCurrentPlaybackMode()</span>
+<span class="fc" id="L109">        setPlaybackModeButtonResource(playbackMode)</span>
+
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        playBackModeButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L112" title="All 6 branches missed.">            val newPlayBackMode = when (audioPlayerHelper.getCurrentPlaybackMode()) {</span>
+                PlaybackMode.NO_REPEAT -&gt; {
+<span class="nc" id="L114">                    PlaybackMode.SHUFFLE</span>
+                }
+
+                PlaybackMode.SHUFFLE -&gt; {
+<span class="nc" id="L118">                    PlaybackMode.REPEAT_PLAYLIST</span>
+                }
+
+                PlaybackMode.REPEAT_PLAYLIST -&gt; {
+<span class="nc" id="L122">                    PlaybackMode.REPEAT_CURRENT_AUDIO_INFINITELY</span>
+                }
+
+<span class="nc" id="L125">                PlaybackMode.REPEAT_CURRENT_AUDIO_INFINITELY -&gt; PlaybackMode.NO_REPEAT</span>
+            }
+<span class="nc bnc" id="L127" title="All 2 branches missed.">            audioPlayerHelper.setPlaybackMode(newPlayBackMode)</span>
+<span class="nc" id="L128">            setPlaybackModeButtonResource(newPlayBackMode)</span>
+
+<span class="nc" id="L130">        }</span>
+
+<span class="pc bpc" id="L132" title="2 of 4 branches missed.">        if (audioPlayerHelper.buffering) {</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            progressBar?.visibility = View.VISIBLE</span>
+        }
+
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        playButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            audioPlayerHelper.togglePlayPauseEvent()</span>
+<span class="nc" id="L138">        }</span>
+
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        pauseButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            audioPlayerHelper.togglePlayPauseEvent()</span>
+<span class="nc" id="L142">        }</span>
+
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        nextButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            audioPlayerHelper.playNextFromList()</span>
+<span class="nc" id="L146">        }</span>
+
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        previousButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            audioPlayerHelper.playPreviousFromList()</span>
+<span class="nc" id="L150">        }</span>
+
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        audioSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {</span>
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">                if (p2) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                    audioPlayerHelper.progressSeekTo(p1.toLong())</span>
+                }
+<span class="fc" id="L157">            }</span>
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+<span class="nc" id="L160">            }</span>
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+<span class="nc" id="L163">            }</span>
+        })
+
+<span class="pc bpc" id="L166" title="2 of 4 branches missed.">        val mediaMetadata = audioPlayerHelper.player?.mediaMetadata</span>
+<span class="fc" id="L167">        setMediaMetadata(mediaMetadata)</span>
+<span class="fc" id="L168">    }</span>
+
+    private fun setPlaybackModeButtonResource(playbackMode: PlaybackMode) {
+<span class="pc bpc" id="L171" title="3 of 4 branches missed.">        val playbackModeResource = when (playbackMode) {</span>
+<span class="nc" id="L172">            PlaybackMode.SHUFFLE -&gt; R.drawable.shuffle_24</span>
+<span class="nc" id="L173">            PlaybackMode.NO_REPEAT -&gt; R.drawable.arrow_right_alt_24</span>
+<span class="fc" id="L174">            PlaybackMode.REPEAT_CURRENT_AUDIO_INFINITELY -&gt; R.drawable.repeat_one_24</span>
+<span class="nc" id="L175">            PlaybackMode.REPEAT_PLAYLIST -&gt; R.drawable.repeat_24</span>
+        }
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        playBackModeButton?.setImageResource(playbackModeResource)</span>
+<span class="fc" id="L178">    }</span>
+
+    fun setActivityInstance(activityInstance: FragmentActivity) {
+<span class="fc" id="L181">        this.activityInstance = activityInstance</span>
+
+<span class="fc" id="L183">        AudioChromeCastFeature.init(activityInstance as FragmentActivity)</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">        if (AudioChromeCastFeature.isChromeCastEnable()) {</span>
+<span class="fc" id="L185">            audioChromeCastFeature = AudioChromeCastFeature.apply {</span>
+<span class="fc" id="L186">                setupCastListener(this@AudioPlayer)</span>
+<span class="fc" id="L187">                registerSessionListener()</span>
+<span class="fc" id="L188">            }</span>
+        }
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        mediaRouteButton?.let {</span>
+<span class="nc" id="L191">            AudioChromeCastFeature.setUpMediaRouteButton(it)</span>
+<span class="nc" id="L192">        }</span>
+<span class="fc" id="L193">    }</span>
+
+    fun setCustomLayout(layoutResourceId: Int) {
+<span class="nc" id="L196">        this.removeAllViewsInLayout()</span>
+<span class="nc" id="L197">        initializePlayerView(layoutResourceId)</span>
+<span class="nc" id="L198">    }</span>
+
+    fun setAutoPlayEnabled(boolean: Boolean) {
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        audioPlayerHelper.setAutoPlayEnabled(boolean)</span>
+<span class="fc" id="L202">    }</span>
+
+    fun prepare() {
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">        audioPlayerHelper.prepare()</span>
+<span class="fc" id="L206">    }</span>
+
+    fun initializePlayer() {
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        audioPlayerHelper.initializePlayer(mContext)</span>
+<span class="fc" id="L210">    }</span>
+
+    fun setPlaylist(audioList: List&lt;Audio&gt;) {
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        audioPlayerHelper.setAudioPlaylist(audioList)</span>
+<span class="fc" id="L214">    }</span>
+
+    fun addAudioList(audioList: List&lt;Audio&gt;) {
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        audioPlayerHelper.addAudioPlaylist(audioList)</span>
+<span class="fc" id="L218">    }</span>
+
+    fun currentPlayingAudioIndex(): Int {
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        return audioPlayerHelper.currentPayingMediaIndex()</span>
+    }
+
+    fun startForegroundService() {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        audioPlayerHelper.startForegroundService()</span>
+<span class="nc" id="L226">    }</span>
+
+    fun destroy() {
+<span class="fc" id="L229">        removeCallbacks()</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">        audioPlayerHelper.destroy()</span>
+<span class="fc" id="L231">    }</span>
+
+    fun removeCallbacks() {
+<span class="fc" id="L234">        AudioPlayerEventBus.instance.unregisterReceiver(this)</span>
+<span class="fc" id="L235">    }</span>
+
+    fun setMediaMetadata(mediaMetadata: MediaMetadata?) {
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">        if (mediaMetadata == null) return</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if (mediaMetadata.title != null) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            textAudioTitle?.text = mediaMetadata.title</span>
+        } else {
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">            textAudioTitle?.text = &quot;Unknown&quot;</span>
+        }
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if (mediaMetadata.artist != null) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">            textArtist?.text = mediaMetadata.artist</span>
+        } else {
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">            textArtist?.text = &quot;Unknown&quot;</span>
+        }
+<span class="pc bpc" id="L249" title="4 of 8 branches missed.">        if (audioPlayerHelper.player?.hasPreviousMediaItem() == true) {</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">            previousButton?.isEnabled = true</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">            previousButton?.visibility = View.VISIBLE</span>
+        } else {
+<span class="nc bnc" id="L253" title="All 2 branches missed.">            previousButton?.isEnabled = false</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            previousButton?.visibility = View.INVISIBLE</span>
+        }
+
+<span class="pc bpc" id="L257" title="4 of 8 branches missed.">        if (audioPlayerHelper.player?.hasNextMediaItem() == true) {</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">            nextButton?.isEnabled = true</span>
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">            nextButton?.visibility = View.VISIBLE</span>
+        } else {
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            nextButton?.isEnabled = false</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            nextButton?.visibility = View.INVISIBLE</span>
+        }
+
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        albumImage?.let {</span>
+<span class="fc" id="L266">            try {</span>
+<span class="fc" id="L267">                Glide.with(mContext).load(mediaMetadata.artworkUri)</span>
+<span class="fc" id="L268">                    .error(R.drawable.audio_placeholder).into(it)</span>
+<span class="fc" id="L269">            } catch (e: Exception) {</span>
+<span class="fc" id="L270">                e.printStackTrace()</span>
+            }
+        }
+<span class="fc" id="L273">        togglePlayPauseButtonResource()</span>
+
+<span class="pc bpc" id="L275" title="2 of 4 branches missed.">        val currentMediaItem = audioPlayerHelper.player?.currentMediaItem</span>
+
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">        currentMediaItem?.let { mediaItem -&gt;</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">            audioChromeCastFeature?.let { chromeCastFeature -&gt;</span>
+<span class="nc bnc" id="L279" title="All 4 branches missed.">                mediaItem.localConfiguration?.uri?.let {</span>
+<span class="nc" id="L280">                    chromeCastFeature.setUpAudioDetails(</span>
+<span class="nc" id="L281">                        streamingURL = it.toString(),</span>
+<span class="nc" id="L282">                        thumbImageUrl = mediaMetadata.artworkUri.toString(),</span>
+<span class="nc" id="L283">                        audioTitle = mediaMetadata.title.toString(),</span>
+<span class="nc" id="L284">                        artist = mediaMetadata.artist.toString()</span>
+                    )
+<span class="nc" id="L286">                }</span>
+            }
+        }
+
+<span class="fc" id="L290">    }</span>
+
+<span class="pc bpc" id="L292" title="2 of 4 branches missed.">    fun isPlaying(): Boolean = audioPlayerHelper.player?.isPlaying ?: false</span>
+
+    fun playMediaItemByIndex(index: Int) {
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        audioPlayerHelper.playMediaItemByIndex(index)</span>
+
+<span class="fc" id="L297">    }</span>
+
+    override fun onDetachedFromWindow() {
+<span class="nc" id="L300">        AudioPlayerEventBus.instance.unregisterReceiver(this)</span>
+<span class="nc" id="L301">        super.onDetachedFromWindow()</span>
+<span class="nc" id="L302">    }</span>
+
+    private fun togglePlayPauseButtonResource() {
+<span class="pc bpc" id="L305" title="2 of 8 branches missed.">        if (audioPlayerHelper.player?.isPlaying == true) {</span>
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">            playButton?.visibility = View.GONE</span>
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">            pauseButton?.visibility = View.VISIBLE</span>
+        } else {
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">            pauseButton?.visibility = View.GONE</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">            playButton?.visibility = View.VISIBLE</span>
+        }
+<span class="fc" id="L312">    }</span>
+
+<span class="nc" id="L314">    fun setChromecastEnabled(value: Boolean, receiverId: String? = null) {</span>
+<span class="fc" id="L315">        AudioChromeCastFeature.setChromeCast(true, null)</span>
+
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if (AudioChromeCastFeature.isChromeCastEnable()) {</span>
+<span class="fc" id="L318">            audioChromeCastFeature = AudioChromeCastFeature.apply {</span>
+<span class="fc" id="L319">                setupCastListener(this@AudioPlayer)</span>
+<span class="fc" id="L320">                registerSessionListener()</span>
+<span class="fc" id="L321">            }</span>
+        }
+
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        mediaRouteButton?.let {</span>
+<span class="nc" id="L325">            AudioChromeCastFeature.setUpMediaRouteButton(it)</span>
+<span class="nc" id="L326">        }</span>
+
+<span class="fc" id="L328">    }</span>
+
+    override fun onBuffer() {
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">        progressBar?.visibility = View.VISIBLE</span>
+<span class="fc" id="L332">        togglePlayPauseButtonResource()</span>
+<span class="fc" id="L333">    }</span>
+
+    override fun onReady() {
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">        progressBar?.visibility = View.INVISIBLE</span>
+<span class="fc" id="L337">        togglePlayPauseButtonResource()</span>
+<span class="fc" id="L338">    }</span>
+
+    override fun onMetadataChanged(mediaMetadata: MediaMetadata) {
+<span class="fc" id="L341">        setMediaMetadata(mediaMetadata)</span>
+<span class="fc" id="L342">    }</span>
+
+    override fun onUpdateSeekbar(currentPosition: Long, totalDuration: Long) {
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">        audioSeekBar?.max = totalDuration.toInt()</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">        audioSeekBar?.progress = currentPosition.toInt()</span>
+<span class="pc bpc" id="L347" title="1 of 2 branches missed.">        textCurrentPosition?.text = Utils.formatTime(currentPosition)</span>
+<span class="pc bpc" id="L348" title="1 of 2 branches missed.">        textDuration?.text = Utils.formatTime(totalDuration)</span>
+<span class="fc" id="L349">    }</span>
+
+    override fun onPlay() {
+<span class="fc" id="L352">        togglePlayPauseButtonResource()</span>
+<span class="fc" id="L353">    }</span>
+
+    override fun onPause() {
+<span class="fc" id="L356">        togglePlayPauseButtonResource()</span>
+<span class="fc" id="L357">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 8.1.2</div></body></html>

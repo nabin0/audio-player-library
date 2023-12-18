@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AudioPlayerNotificationManager.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.github.nabin0.audioplayer.notification</a> &gt; <span class="el_source">AudioPlayerNotificationManager.kt</span></div><h1>AudioPlayerNotificationManager.kt</h1><pre class="source lang-java linenums">package com.github.nabin0.audioplayer.notification
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
+import androidx.media3.ui.PlayerNotificationManager
+import androidx.media3.ui.PlayerNotificationManager.NotificationListener
+import java.lang.reflect.Modifier.PRIVATE
+
+@VisibleForTesting(otherwise = PRIVATE)
+internal const val NOTIFICATION_ID = 12
+
+@VisibleForTesting(otherwise = PRIVATE)
+internal const val NOTIFICATION_CHANNEL_NAME = &quot;nabin0.audioplayer.channel_&quot;
+
+@VisibleForTesting(otherwise = PRIVATE)
+internal const val NOTIFICATION_CHANNEL_ID = &quot;nabin0.audioplayer.channel_id_&quot;
+
+/**
+ * It is responsible to create and manage Media3 notification for foreground service
+ */
+<span class="fc" id="L32">@UnstableApi</span>
+<span class="fc" id="L33">class AudioPlayerNotificationManager(</span>
+<span class="fc" id="L34">    private val context: Context,</span>
+<span class="fc" id="L35">    @get:VisibleForTesting(otherwise = PRIVATE)</span>
+<span class="nc" id="L36">    internal val exoPlayer: ExoPlayer,</span>
+<span class="fc" id="L37">    private val notificationListener: NotificationListener,</span>
+) {
+    @VisibleForTesting(otherwise = PRIVATE)
+<span class="fc" id="L40">    internal var playerNotificationManager: PlayerNotificationManager? = null</span>
+
+    @VisibleForTesting(otherwise = PRIVATE)
+<span class="pc" id="L43">    internal var notificationManager: NotificationManagerCompat =</span>
+<span class="fc" id="L44">        NotificationManagerCompat.from(context)</span>
+
+<span class="fc" id="L46">    init {</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {</span>
+<span class="fc" id="L48">            createNotificationChannel()</span>
+        }
+<span class="fc" id="L50">    }</span>
+
+    fun startNotification(mediaSession: MediaSession, mediaSessionService: MediaSessionService) {
+<span class="nc" id="L53">        buildNotification(mediaSession = mediaSession)</span>
+<span class="nc" id="L54">        startForegroundNotificationService(mediaSessionService)</span>
+<span class="nc" id="L55">    }</span>
+
+    @VisibleForTesting(otherwise = PRIVATE)
+    internal fun startForegroundNotificationService(mediaSessionService: MediaSessionService) {
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        val notification = if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {</span>
+<span class="fc" id="L60">            Notification.Builder(context, NOTIFICATION_CHANNEL_ID)</span>
+<span class="fc" id="L61">                .setCategory(Notification.CATEGORY_SERVICE)</span>
+<span class="fc" id="L62">                .build()</span>
+        } else {
+<span class="nc" id="L64">            Notification.Builder(context).setCategory(Notification.CATEGORY_SERVICE).build()</span>
+        }
+<span class="fc" id="L66">        mediaSessionService.startForeground(NOTIFICATION_ID, notification)</span>
+<span class="fc" id="L67">    }</span>
+
+    @VisibleForTesting(otherwise = PRIVATE)
+    internal fun buildNotification(mediaSession: MediaSession) {
+<span class="pc" id="L71">        playerNotificationManager = PlayerNotificationManager.Builder(</span>
+<span class="fc" id="L72">            context,</span>
+<span class="fc" id="L73">            NOTIFICATION_ID,</span>
+<span class="fc" id="L74">            NOTIFICATION_CHANNEL_ID</span>
+        )
+<span class="fc" id="L76">            .setMediaDescriptionAdapter(</span>
+<span class="fc" id="L77">                AudioPlayerNotificationAdapter(</span>
+<span class="fc" id="L78">                    context = context,</span>
+<span class="fc" id="L79">                    pendingIntent = mediaSession.sessionActivity</span>
+                )
+            )
+<span class="fc" id="L82">            .setSmallIconResourceId(androidx.media3.session.R.drawable.media3_notification_small_icon)</span>
+<span class="fc" id="L83">            .setNotificationListener(notificationListener)</span>
+<span class="fc" id="L84">            .build()</span>
+<span class="pc" id="L85">            .also {</span>
+<span class="fc" id="L86">                it.setMediaSessionToken(mediaSession.sessionCompatToken)</span>
+<span class="fc" id="L87">                it.setUseFastForwardActionInCompactView(false)</span>
+<span class="fc" id="L88">                it.setUseRewindActionInCompactView(false)</span>
+<span class="fc" id="L89">                it.setUseNextActionInCompactView(true)</span>
+<span class="fc" id="L90">                it.setUsePreviousActionInCompactView(true)</span>
+<span class="fc" id="L91">                it.setUseNextActionInCompactView(true)</span>
+<span class="fc" id="L92">                it.setUsePreviousAction(true)</span>
+<span class="fc" id="L93">                it.setUseNextAction(true)</span>
+<span class="fc" id="L94">                it.setUseStopAction(false)</span>
+<span class="fc" id="L95">                it.setPriority(NotificationCompat.PRIORITY_LOW)</span>
+<span class="nc" id="L96">                it.setPlayer(exoPlayer)</span>
+<span class="nc" id="L97">            }</span>
+<span class="nc" id="L98">    }</span>
+
+
+    fun stopNotification() {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        playerNotificationManager?.setPlayer(null)</span>
+<span class="fc" id="L103">    }</span>
+
+    @VisibleForTesting(otherwise = PRIVATE)
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun createNotificationChannel() {
+<span class="fc" id="L108">        val channel = NotificationChannel(</span>
+<span class="fc" id="L109">            NOTIFICATION_CHANNEL_ID,</span>
+<span class="fc" id="L110">            NOTIFICATION_CHANNEL_NAME,</span>
+<span class="fc" id="L111">            NotificationManager.IMPORTANCE_HIGH</span>
+        )
+<span class="fc" id="L113">        notificationManager.createNotificationChannel(channel)</span>
+<span class="fc" id="L114">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 8.1.2</div></body></html>

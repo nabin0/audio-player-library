@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AudioPlayerService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.github.nabin0.audioplayer.service</a> &gt; <span class="el_source">AudioPlayerService.kt</span></div><h1>AudioPlayerService.kt</h1><pre class="source lang-java linenums">package com.github.nabin0.audioplayer.service
+
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
+import androidx.media3.ui.PlayerNotificationManager
+import com.github.nabin0.audioplayer.broadcast_receiver.HeadsetBroadcastReceiver
+import com.github.nabin0.audioplayer.notification.AudioPlayerNotificationManager
+import com.github.nabin0.audioplayer.utils.Constants
+import com.github.nabin0.audioplayer.utils.Constants.APP_IN_BACKGROUND
+import com.github.nabin0.audioplayer.utils.Constants.STOP_FOREGROUND_SERVICE
+import com.github.nabin0.audioplayer.utils.ExoPlayerHelper
+
+/**
+ * Service class that manages the foreground service (Media Notification) for the Audioplayer
+ *
+ * Should be used when the notification is required
+ *
+ */
+<span class="fc" id="L24">class AudioPlayerService : MediaSessionService(), PlayerNotificationManager.NotificationListener {</span>
+    private lateinit var mediaSession: MediaSession
+    private lateinit var notificationManager: AudioPlayerNotificationManager
+    private lateinit var exoPlayer: ExoPlayer
+
+<span class="fc" id="L29">    private val headsetReceiver = HeadsetBroadcastReceiver()</span>
+
+    companion object {
+<span class="nc" id="L32">        var isServiceRunning = false</span>
+    }
+
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession =
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        mediaSession</span>
+
+    @UnstableApi
+    override fun onCreate() {
+<span class="fc" id="L40">        super.onCreate()</span>
+
+        /** Registering Headset receiver that manages player instance when headset event occurs */
+<span class="fc" id="L43">        val headSetIntentFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)</span>
+<span class="fc" id="L44">        headSetIntentFilter.addAction(Intent.ACTION_HEADSET_PLUG)</span>
+<span class="fc" id="L45">        registerReceiver(headsetReceiver, headSetIntentFilter)</span>
+
+<span class="fc" id="L47">        exoPlayer = ExoPlayerHelper.getExoplayerInstance(this)</span>
+<span class="fc" id="L48">        mediaSession = ExoPlayerHelper.getMediaSession(this)</span>
+<span class="fc" id="L49">        notificationManager = ExoPlayerHelper.getNotificationManager(</span>
+<span class="fc" id="L50">            this, this@AudioPlayerService</span>
+        )
+<span class="fc" id="L52">        isServiceRunning = true</span>
+<span class="fc" id="L53">    }</span>
+
+    @UnstableApi
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+<span class="fc" id="L57">        isServiceRunning = true</span>
+        /**Show Notification only when App is not in background and stop foreground is not called*/
+<span class="fc" id="L59">        val shouldStartNotification =</span>
+<span class="pc bpc" id="L60" title="6 of 8 branches missed.">            (intent?.action != STOP_FOREGROUND_SERVICE) &amp;&amp; (intent?.action != APP_IN_BACKGROUND)</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (shouldStartNotification) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            notificationManager.startNotification(</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                mediaSession = mediaSession, mediaSessionService = this</span>
+            )
+        }
+
+<span class="pc bpc" id="L67" title="3 of 6 branches missed.">        if (intent?.hasExtra(Constants.HEADSET_ACTION) == true) {</span>
+<span class="pc bpc" id="L68" title="4 of 5 branches missed.">            when (intent.getStringExtra(Constants.HEADSET_ACTION)) {</span>
+                Constants.PLAY -&gt; {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                    exoPlayer.play()</span>
+                }
+
+                Constants.PAUSE -&gt; {
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                    exoPlayer.pause()</span>
+                }
+            }
+        }
+
+<span class="fc" id="L79">        return super.onStartCommand(intent, flags, startId)</span>
+    }
+
+    @OptIn(UnstableApi::class) private fun stopService() {
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        mediaSession.release()</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        notificationManager.stopNotification()</span>
+<span class="fc" id="L85">        this@AudioPlayerService.stopForeground(true)</span>
+<span class="fc" id="L86">        stopSelf()</span>
+<span class="fc" id="L87">        isServiceRunning = false</span>
+<span class="fc" id="L88">    }</span>
+
+    override fun onDestroy() {
+<span class="fc" id="L91">        stopService()</span>
+<span class="fc" id="L92">        unregisterReceiver(headsetReceiver)</span>
+<span class="fc" id="L93">        super.onDestroy()</span>
+<span class="fc" id="L94">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 8.1.2</div></body></html>

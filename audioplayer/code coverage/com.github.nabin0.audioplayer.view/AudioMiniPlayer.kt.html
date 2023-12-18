@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AudioMiniPlayer.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.github.nabin0.audioplayer.view</a> &gt; <span class="el_source">AudioMiniPlayer.kt</span></div><h1>AudioMiniPlayer.kt</h1><pre class="source lang-java linenums">package com.github.nabin0.audioplayer.view
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.SeekBar
+import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageButton
+import androidx.media3.common.MediaMetadata
+import com.bumptech.glide.Glide
+import com.github.nabin0.audioplayer.R
+import com.github.nabin0.audioplayer.events.AudioPlayerEventBus
+import com.github.nabin0.audioplayer.events.AudioPlayerEventListener
+import com.github.nabin0.audioplayer.models.Audio
+import com.github.nabin0.audioplayer.utils.ExoPlayerHelper
+
+/**
+ * Default view class for the bottom mini player for the audioPlayer listens to the Events Emitted by AudioPlayerHelper same as the AudioPlayer class
+ *
+ * It also provides method to change layout, use setCustomLayout(layoutResourceId: Int) parameter layoutResourceId is id of the resource file you want to apply
+ */
+class AudioMiniPlayer : FrameLayout, AudioPlayerEventListener {
+    private var mContext: Context
+    private lateinit var audioPlayerHelper: AudioPlayerHelper
+
+    private var albumImage: ImageView? = null
+    private var playButton: AppCompatImageButton? = null
+    private var pauseButton: AppCompatImageButton? = null
+    private var nextButton: AppCompatImageButton? = null
+    private var audioSeekBar: SeekBar? = null
+    private var textAudioTitle: TextView? = null
+    private var textArtist: TextView? = null
+    private var progressBar: ProgressBar? = null
+
+<span class="nc" id="L40">    constructor(context: Context) : super(context) {</span>
+<span class="nc" id="L41">        this.mContext = context</span>
+<span class="nc" id="L42">        initializePlayerView(null)</span>
+<span class="nc" id="L43">    }</span>
+
+<span class="nc" id="L45">    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {</span>
+<span class="nc" id="L46">        this.mContext = context</span>
+<span class="nc" id="L47">        initializePlayerView(null)</span>
+<span class="nc" id="L48">    }</span>
+
+<span class="nc" id="L50">    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(</span>
+<span class="nc" id="L51">        context, attrs, defStyleAttr</span>
+    ) {
+<span class="nc" id="L53">        this.mContext = context</span>
+<span class="nc" id="L54">        initializePlayerView(null)</span>
+<span class="nc" id="L55">    }</span>
+
+<span class="nc" id="L57">    init {</span>
+<span class="nc" id="L58">        AudioPlayerEventBus.instance.registerReceiver(this)</span>
+<span class="nc" id="L59">    }</span>
+
+    @SuppressLint(&quot;UnspecifiedRegisterReceiverFlag&quot;)
+    private fun initializePlayerView(layoutResourceId: Int?) {
+<span class="nc" id="L63">        audioPlayerHelper = ExoPlayerHelper.getAudioPlayerHelperInstance(mContext)</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        val layoutId = layoutResourceId ?: R.layout.audio_mini_player_layout</span>
+<span class="nc" id="L65">        LayoutInflater.from(mContext).inflate(layoutId, this)</span>
+
+<span class="nc" id="L67">        playButton = findViewById(R.id.playButton)</span>
+<span class="nc" id="L68">        pauseButton = findViewById(R.id.pauseButton)</span>
+<span class="nc" id="L69">        audioSeekBar = findViewById(R.id.audioSeekBar)</span>
+<span class="nc" id="L70">        albumImage = findViewById(R.id.albumImage)</span>
+<span class="nc" id="L71">        nextButton = findViewById(R.id.nextButton)</span>
+<span class="nc" id="L72">        textAudioTitle = findViewById(R.id.textAudioTitle)</span>
+<span class="nc" id="L73">        textArtist = findViewById(R.id.textArtist)</span>
+<span class="nc" id="L74">        progressBar = findViewById(R.id.progressBar)</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        playButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            audioPlayerHelper.togglePlayPauseEvent()</span>
+<span class="nc" id="L78">        }</span>
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        pauseButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            audioPlayerHelper.togglePlayPauseEvent()</span>
+<span class="nc" id="L82">        }</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        nextButton?.setOnClickListener {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            audioPlayerHelper.playNextFromList()</span>
+<span class="nc" id="L86">        }</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        audioSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {</span>
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                if (p2) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                    audioPlayerHelper.progressSeekTo(p1.toLong())</span>
+                }
+<span class="nc" id="L93">            }</span>
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+<span class="nc" id="L96">            }</span>
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+<span class="nc" id="L99">            }</span>
+        })
+<span class="nc bnc" id="L101" title="All 4 branches missed.">        if (audioPlayerHelper.buffering) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            progressBar?.visibility = View.VISIBLE</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            playButton?.visibility = View.GONE</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            pauseButton?.visibility = View.GONE</span>
+        }
+
+<span class="nc bnc" id="L107" title="All 4 branches missed.">        val mediaMetadata = audioPlayerHelper.player?.mediaMetadata</span>
+<span class="nc" id="L108">        setMediaMetadata(mediaMetadata)</span>
+<span class="nc" id="L109">    }</span>
+
+    private fun setMediaMetadata(mediaMetadata: MediaMetadata?) {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (mediaMetadata == null) return</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (mediaMetadata.title != null) {</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            textAudioTitle?.text = mediaMetadata.title</span>
+        } else {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            textAudioTitle?.text = &quot;Unknown&quot;</span>
+        }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (mediaMetadata.artist != null) {</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            textArtist?.text = mediaMetadata.artist</span>
+        } else {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            textArtist?.text = &quot;Unknown&quot;</span>
+        }
+
+<span class="nc bnc" id="L124" title="All 8 branches missed.">        if (audioPlayerHelper.player?.hasNextMediaItem() == true) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            nextButton?.isEnabled = true</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            nextButton?.visibility = View.VISIBLE</span>
+        } else {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            nextButton?.isEnabled = false</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">            nextButton?.visibility = View.GONE</span>
+        }
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        albumImage?.let {</span>
+<span class="nc" id="L133">            try {</span>
+<span class="nc" id="L134">                Glide.with(mContext).load(mediaMetadata.artworkUri)</span>
+<span class="nc" id="L135">                    .error(R.drawable.audio_placeholder).into(it)</span>
+<span class="nc" id="L136">            } catch (e: Exception) {</span>
+<span class="nc" id="L137">                e.printStackTrace()</span>
+            }
+        }
+<span class="nc" id="L140">        togglePlayPauseButtonResource()</span>
+<span class="nc" id="L141">    }</span>
+
+    fun setCustomLayout(layoutResourceId: Int) {
+<span class="nc" id="L144">        this.removeAllViewsInLayout()</span>
+<span class="nc" id="L145">        initializePlayerView(layoutResourceId)</span>
+<span class="nc" id="L146">    }</span>
+
+    fun setAutoPlayEnabled(boolean: Boolean) {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        audioPlayerHelper.setAutoPlayEnabled(boolean)</span>
+<span class="nc" id="L150">    }</span>
+
+    fun prepare(audioList: List&lt;Audio&gt;) {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        audioPlayerHelper.prepare()</span>
+<span class="nc" id="L154">    }</span>
+
+    fun currentPlayingAudioIndex(): Int {
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        return audioPlayerHelper.currentPayingMediaIndex()</span>
+    }
+
+    fun initializePlayer() {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        audioPlayerHelper.initializePlayer(mContext)</span>
+<span class="nc" id="L162">    }</span>
+
+    fun setPlaylist(audioList: List&lt;Audio&gt;) {
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        audioPlayerHelper.setAudioPlaylist(audioList)</span>
+<span class="nc" id="L166">    }</span>
+
+    fun addAudioList(audioList: List&lt;Audio&gt;) {
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        audioPlayerHelper.addAudioPlaylist(audioList)</span>
+<span class="nc" id="L170">    }</span>
+
+<span class="nc bnc" id="L172" title="All 4 branches missed.">    fun isPlaying(): Boolean = audioPlayerHelper.player?.isPlaying ?: false</span>
+    private fun togglePlayPauseButtonResource() {
+<span class="nc bnc" id="L174" title="All 8 branches missed.">        if (audioPlayerHelper.player?.isPlaying == true) {</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">            playButton?.visibility = View.GONE</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">            pauseButton?.visibility = View.VISIBLE</span>
+        } else {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            pauseButton?.visibility = View.GONE</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            playButton?.visibility = View.VISIBLE</span>
+        }
+<span class="nc" id="L181">    }</span>
+
+    fun removeCallbacks() {
+<span class="nc" id="L184">        AudioPlayerEventBus.instance.unregisterReceiver(this)</span>
+<span class="nc" id="L185">    }</span>
+
+    override fun onBuffer() {
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        progressBar?.visibility = View.VISIBLE</span>
+<span class="nc" id="L189">        togglePlayPauseButtonResource()</span>
+<span class="nc" id="L190">    }</span>
+
+    override fun onReady() {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        progressBar?.visibility = View.GONE</span>
+<span class="nc" id="L194">        togglePlayPauseButtonResource()</span>
+<span class="nc" id="L195">    }</span>
+
+    override fun onMetadataChanged(mediaMetadata: MediaMetadata) {
+<span class="nc" id="L198">        setMediaMetadata(mediaMetadata)</span>
+<span class="nc" id="L199">    }</span>
+
+    override fun onUpdateSeekbar(currentPosition: Long, totalDuration: Long) {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        audioSeekBar?.max = totalDuration.toInt()</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        audioSeekBar?.progress = currentPosition.toInt()</span>
+<span class="nc" id="L204">    }</span>
+
+    override fun onPlay() {
+<span class="nc" id="L207">        togglePlayPauseButtonResource()</span>
+<span class="nc" id="L208">    }</span>
+
+    override fun onPause() {
+<span class="nc" id="L211">        togglePlayPauseButtonResource()</span>
+<span class="nc" id="L212">    }</span>
+
+    fun destroy() {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        audioPlayerHelper.destroy()</span>
+<span class="nc" id="L216">    }</span>
+
+    override fun onDetachedFromWindow() {
+<span class="nc" id="L219">        AudioPlayerEventBus.instance.unregisterReceiver(this)</span>
+<span class="nc" id="L220">        super.onDetachedFromWindow()</span>
+<span class="nc" id="L221">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 8.1.2</div></body></html>
